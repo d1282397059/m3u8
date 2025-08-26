@@ -3,126 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>M3U8 播放器 - Artplayer</title>
+    <title>M3U8播放器在线 - 免费HLS视频播放工具 | ArtPlayer驱动</title>
+    <meta name="description" content="无需安装，在线播放M3U8、MP4视频，支持HLS自适应码率、弹幕、字幕、截图、倍速。基于ArtPlayer，手机、电脑即开即播。">
+    <meta name="keywords" content="m3u8播放器,hls播放器,在线m3u8,在线hls,artplayer网页播放器">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="./css/styles.css">
     <style>
-        :root {
-            --brand: #00b894;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --border: #e5e7eb;
-            /* 提升进度条可拖动区域（上下各 +20px，总计 +40px） */
-            --art-progress-touch-height: 44px;
-        }
-
-        * { box-sizing: border-box }
-
-        body {
-            margin: 0;
-            color: var(--text);
-            background: radial-gradient(1200px 600px at 20% -10%, #e8fff8 0, rgba(255,255,255,0) 60%),
-                        radial-gradient(1000px 500px at 120% -20%, #e6f3ff 0, rgba(255,255,255,0) 60%),
-                        var(--bg);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-
-        .shell {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px 16px 40px;
-        }
-
-        .nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 14px 16px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            letter-spacing: .2px;
-        }
-
-        .brand .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--brand);
-            box-shadow: 0 0 0 6px rgba(0, 184, 148, .12);
-        }
-
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr auto auto;
-            gap: 10px;
-            width: 100%;
-            max-width: 720px;
-        }
-
-        .input {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            background: #fff;
-        }
-
-        .input input {
-            width: 100%;
-            border: 0;
-            outline: 0;
-            font-size: 14px;
-            color: var(--text)
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border: 1px solid var(--brand);
-            background: var(--brand);
-            color: #fff;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: .2s ease;
-        }
-
-        .btn.secondary {
-            background: transparent;
-            color: var(--brand);
-        }
-
-        .btn:active { transform: translateY(1px) }
-
-        .alert {
-            display: none;
-            margin: 14px 0 0;
-            padding: 10px 12px;
-            border-radius: 10px;
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
-            color: #9a3412;
-        }
-
-        .card {
-            margin-top: 18px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
-        }
+        .card { margin-top: 18px; overflow: hidden }
 
         #player {
             width: 100%;
@@ -131,26 +18,24 @@
         }
 
         /* 扩大进度条的可点击/拖动热区而不影响布局高度 */
-        #player .art-progress { padding-top: 20px; padding-bottom: 20px; margin-top: -20px; margin-bottom: -20px }
-
-        .footer {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: var(--muted);
-            margin-top: 16px;
-            font-size: 13px;
+        #player .art-progress {
+            padding-top: 20px;
+            padding-bottom: 20px;
+            margin-top: -20px;
+            margin-bottom: -20px
         }
 
-        @media (max-width: 600px) {
-            .controls { grid-template-columns: 1fr auto }
-            .btn.secondary { display: none }
-        }
     </style>
 </head>
 
 <body>
+    <!-- 顶部菜单栏 -->
+    <div class="topbar">
+        <a href="index.html" class="active">首页</a>
+        <a href="docs.html">文章页</a>
+    </div>
+
+
     <div class="shell">
         <div class="nav">
             <div class="brand">
@@ -160,7 +45,7 @@
             <div class="controls">
                 <div class="input">
                     <input id="urlInput" type="text" placeholder="请输入 m3u8 或 mp4 地址"
-                           value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
+                        value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
                 </div>
                 <button class="btn secondary" onclick="loadDemo()">示例</button>
                 <button class="btn" onclick="playVideo()">播放</button>
@@ -173,7 +58,54 @@
             <div id="player"></div>
         </div>
 
-        <div class="footer">基于 Artplayer + Hls.js</div>
+        <div class="remark">
+            <h3>什么是ArtPlayer？</h3>
+            <p>
+                ArtPlayer — 轻量级、全功能 HTML5 视频播放器,支持 MP4 / HLS / FLV / WebM 等主流格式，并内置弹幕、字幕、清晰度切换、截图、画中画、倍速播放等丰富功能。
+            </p>
+
+            <h3>什么是m3u8文件？</h3>
+            <p>
+                <strong>M3U8</strong> 是一种基于 UTF-8 编码的播放列表（playlist）文本文件，扩展名为 <code>.m3u8</code>。
+                它本身并不包含视频数据，而是按顺序列出若干 <em>TS 切片</em>（小片段）或不同清晰度的子流地址，供播放器按需拉取并无缝拼接播放，因此是实现 <strong>HLS（HTTP Live
+                    Streaming）</strong> 的核心文件。
+            </p>
+
+
+            <h3>核心特点</h3>
+            <ul>
+                <li>📡 <strong>自适应码率</strong>：同一 M3U8 可引用 240p、480p、720p 等多条子流，播放器根据网络实时切换。</li>
+                <li>🧩 <strong>切片传输</strong>：视频被切成 2-10 秒小片段，降低首帧等待并支持边下边播。</li>
+                <li>🌐 <strong>纯 HTTP 分发</strong>：无需特殊协议，任何 CDN、Nginx、Apache 均可直接托管。</li>
+                <li>📝 <strong>纯文本格式</strong>：可用任意编辑器查看，方便调试与二次开发。</li>
+            </ul>
+
+            <h3>典型结构示例</h3>
+            <pre><code class="language-text">#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:6
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:6.000,
+segment0.ts
+#EXTINF:6.000,
+segment1.ts
+#EXT-X-ENDLIST
+</code></pre>
+
+        </div>
+
+        <div class="wise_saying">
+            <b>锲而不舍，金石可镂。——《荀子·劝学》</b>
+        </div>
+
+        <div class="footer">
+            <span>友情链接：</span>
+            <a href="https://www.csdn.net/" target="_blank" rel="noopener">CSDN</a>
+            <span>·</span>
+            <a href="https://www.cnblogs.com/" target="_blank" rel="noopener">博客园</a>
+            <span>·</span>
+            <a href="https://artplayer.org/" target="_blank" rel="noopener">ArtPlayer 官网</a>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/artplayer@5/dist/artplayer.min.js"></script>
@@ -241,7 +173,7 @@
                     try {
                         art.muted = false;
                         if (art.volume === 0) art.volume = 0.8;
-                    } catch (e) {}
+                    } catch (e) { }
                 });
                 hls.on(Hls.Events.ERROR, function (_, data) {
                     if (data && data.fatal) {

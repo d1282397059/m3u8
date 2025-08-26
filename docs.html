@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表 - M3U8播放器在线</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="文章列表，展示 docs 目录下的文章。支持从 manifest.json 加载元数据。">
+    <link rel="stylesheet" href="./css/styles.css">
+    <style>
+        /* 列表与卡片（页面特有） */
+        .header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 8px 0 14px;
+            padding: 14px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+        }
+
+        .list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 860px) {
+            .list {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08)
+        }
+
+        .title {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 13px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .tag {
+            font-size: 12px;
+            color: #0f766e;
+            background: rgba(0, 184, 148, 0.14);
+            border: 1px solid rgba(0, 184, 148, 0.25);
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        .desc {
+            color: #334155;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 12px 0
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px
+        }
+
+        .btn {
+            margin-top: 14px;
+            padding: 8px 14px;
+            text-decoration: none;
+            font-size: 14px
+        }
+
+        .empty {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="topbar">
+        <a href="index.html">首页</a>
+        <a href="docs.html" class="active">文章页</a>
+    </div>
+
+    <div class="shell">
+        <div class="header">
+            <div>
+                <h2 style="margin:0">文章列表</h2>
+                <div style="color:var(--muted);font-size:13px">来自项目根目录下的 <code>docs</code> 文件夹</div>
+            </div>
+        </div>
+
+        <div id="list" class="list"></div>
+        <div id="empty" class="empty" style="display:none"></div>
+    </div>
+
+    <script>
+        const listEl = document.getElementById('list');
+        const emptyEl = document.getElementById('empty');
+
+        function renderArticles(articles) {
+            if (!articles || articles.length === 0) {
+                emptyEl.style.display = 'block';
+                emptyEl.textContent = '未找到文章。请在项目的 docs/ 目录中添加 markdown 或 html 文件，并可选创建 docs/manifest.json。';
+                return;
+            }
+            const frag = document.createDocumentFragment();
+            articles.forEach(function (item) {
+                const card = document.createElement('article');
+                card.className = 'card';
+
+                const h3 = document.createElement('h3');
+                h3.className = 'title';
+                const link = document.createElement('a');
+                link.href = item.path || '#';
+                link.textContent = item.title || '未命名文章';
+                link.style.textDecoration = 'none';
+                link.style.color = 'inherit';
+                h3.appendChild(link);
+
+                const meta = document.createElement('div');
+                meta.className = 'meta';
+                if (item.date) {
+                    const dateSpan = document.createElement('span');
+                    dateSpan.textContent = item.date;
+                    meta.appendChild(dateSpan);
+                }
+                if (item.author) {
+                    const au = document.createElement('span');
+                    au.textContent = '作者：' + item.author;
+                    meta.appendChild(au);
+                }
+
+                const desc = document.createElement('p');
+                desc.className = 'desc';
+                desc.textContent = item.summary || item.description || '';
+
+                const tagWrap = document.createElement('div');
+                tagWrap.className = 'tags';
+                if (Array.isArray(item.tags)) {
+                    item.tags.forEach(function (t) {
+                        const tag = document.createElement('span');
+                        tag.className = 'tag';
+                        tag.textContent = t;
+                        tagWrap.appendChild(tag);
+                    });
+                }
+
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+                const readBtn = document.createElement('a');
+                readBtn.className = 'btn';
+                readBtn.href = item.path || '#';
+                readBtn.textContent = '阅读';
+                readBtn.target = '_blank';
+                readBtn.rel = 'noopener';
+
+                actions.appendChild(readBtn);
+
+                card.appendChild(h3);
+                card.appendChild(meta);
+                if (desc.textContent) card.appendChild(desc);
+                if (tagWrap.childNodes.length) card.appendChild(tagWrap);
+                card.appendChild(actions);
+
+                frag.appendChild(card);
+            });
+            listEl.appendChild(frag);
+        }
+
+        function normalizeArticles(data) {
+            if (!data) return [];
+            if (Array.isArray(data)) return data;
+            if (Array.isArray(data.articles)) return data.articles;
+            return [];
+        }
+
+        async function loadManifest() {
+            try {
+                const res = await fetch('docs/manifest.json', { cache: 'no-cache' });
+                if (!res.ok) throw new Error('manifest not found');
+                const json = await res.json();
+                const articles = normalizeArticles(json);
+                if (!articles.length) throw new Error('empty manifest');
+                renderArticles(articles);
+            } catch (e) {
+                emptyEl.style.display = 'block';
+                emptyEl.innerHTML = '未检测到 <code>docs/manifest.json</code>，请创建示例：<pre style="margin-top:8px;white-space:pre-wrap;background:#fff;padding:10px;border-radius:8px;border:1px solid var(--border)">\
+{\n  "articles": [\n    {\n      "title": "示例文章",\n      "path": "docs/example.html",\n      "date": "2025-01-01",\n      "author": "作者名",\n      "summary": "这里是摘要……",\n      "tags": ["HLS", "M3U8"]\n    }\n  ]\n}\n</pre>';
+            }
+        }
+
+        loadManifest();
+    </script>
+</body>
+
+</html>

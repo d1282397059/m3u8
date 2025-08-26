@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>什么是 M3U8（HLS 播放列表）</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="介绍 M3U8/HLS 的基础概念、典型结构与优势，以及如何播放。">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .article { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 20px 40px rgba(15,23,42,.06) }
+        .article h1 { margin: 0 0 6px 0 }
+        .article .meta { color: var(--muted); font-size: 13px; margin-bottom: 16px }
+        .article pre { background: #0b1220; color: #e5e7eb; padding: 12px 14px; border-radius: 10px; overflow: auto; border: 1px solid #0f172a }
+        .article code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace }
+        .article img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border) }
+        .toc { margin: 16px 0; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: #ffffff }
+        .toc a { color: var(--brand); text-decoration: none }
+        .toc a:hover { text-decoration: underline; text-underline-offset: 3px }
+        .back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px }
+        .back a { color: var(--brand); text-decoration: none; font-weight: 600 }
+        .back a:hover { text-decoration: underline; text-underline-offset: 3px }
+    </style>
+</head>
+
+<body>
+    <div class="topbar">
+        <a href="../index.html">首页</a>
+        <a href="../docs.html" class="active">文章页</a>
+    </div>
+
+    <div class="shell">
+        <div class="back"><a href="../docs.html">← 返回文章列表</a></div>
+        <article class="article">
+            <h1>什么是 M3U8？</h1>
+            <div class="meta">发布于 2025-01-01 · 作者：作者名 · 标签：HLS、M3U8、流媒体</div>
+
+            <p>M3U8 是一种基于 UTF-8 编码的播放列表（playlist）文本格式，文件扩展名为 <code>.m3u8</code>。它常用于苹果提出的 <strong>HLS（HTTP Live Streaming）</strong> 流媒体标准，是将一段视频切割成若干小的 <em>TS 切片</em> 并按需加载、顺序播放的核心索引文件。</p>
+
+            <div class="toc">
+                <b>目录</b>
+                <ol style="margin:8px 0 0 16px">
+                    <li><a href="#why">为什么使用 M3U8/HLS</a></li>
+                    <li><a href="#structure">典型结构示例</a></li>
+                    <li><a href="#play">如何播放 M3U8</a></li>
+                    <li><a href="#faq">常见问题</a></li>
+                </ol>
+            </div>
+
+            <h2 id="why">为什么使用 M3U8/HLS</h2>
+            <ul>
+                <li><b>自适应码率</b>：同一播放列表可包含多条不同清晰度的视频流，播放器可根据网络状况无缝切换。</li>
+                <li><b>边下边播</b>：切片通常为 2–10 秒，能快速起播、降低卡顿。</li>
+                <li><b>广泛兼容</b>：通过普通 HTTP/HTTPS 分发，易于在各类 CDN 上部署。</li>
+                <li><b>纯文本</b>：便于调试与自动化处理，结合加密与鉴权方案也很灵活。</li>
+            </ul>
+
+            <h2 id="structure">典型结构示例</h2>
+            <p>以下为一个最简的 <code>.m3u8</code> 文件片段：</p>
+            <pre><code>#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:6
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:6.000,
+segment0.ts
+#EXTINF:6.000,
+segment1.ts
+#EXT-X-ENDLIST
+            </code></pre>
+
+            <p>自适应多码率的主索引（Master Playlist）通常包含多个不同分辨率/码率的子流：</p>
+            <pre><code>#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360
+low/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=1400000,RESOLUTION=1280x720
+mid/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=2800000,RESOLUTION=1920x1080
+high/index.m3u8
+            </code></pre>
+
+            <h2 id="play">如何播放 M3U8</h2>
+            <p>在本项目首页我们使用 <b>ArtPlayer</b> 搭配 <b>hls.js</b> 实现网页播放。你可以在首页输入 M3U8 地址直接播放，或点击“示例”按钮快速体验。</p>
+            <p>如果你在自己的站点中使用，可参考以下最小示例（基于 hls.js）：</p>
+            <pre><code class="language-html">&lt;video id="v" controls&gt;&lt;/video&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/hls.js@latest"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const url = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+  const video = document.getElementById('v');
+  if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+  } else if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+  }
+&lt;/script&gt;
+            </code></pre>
+
+            <h2 id="faq">常见问题</h2>
+            <details>
+                <summary>为什么 Safari 可以直接播而 Chrome 要用 hls.js？</summary>
+                <div style="margin-top:8px;color:#334155">Safari 原生支持 HLS；大多数非 Safari 浏览器需要通过 JavaScript 解码库（如 hls.js）来支持 MSE 播放。</div>
+            </details>
+            <details>
+                <summary>能否防止盗链或下载？</summary>
+                <div style="margin-top:8px;color:#334155">可结合 Token 鉴权、Referer 限制、切片加密与短时 URL 等手段，但前端始终无法完全阻止抓包与下载。</div>
+            </details>
+
+            <div class="remark" style="margin-top:18px">
+                想进一步了解或调试 M3U8，可使用浏览器开发者工具查看网络请求，或阅读 HLS 规范（RFC 8216）。
+            </div>
+        </article>
+    </div>
+</body>
+
+</html>
+
+
