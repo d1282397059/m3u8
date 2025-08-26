@@ -1,14 +1,271 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
+
 <head>
-  <meta charset="UTF-8">
-  <title>我的主页</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 50px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>M3U8 播放器 - Artplayer</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        :root {
+            --brand: #00b894;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            /* 提升进度条可拖动区域（上下各 +20px，总计 +40px） */
+            --art-progress-touch-height: 44px;
+        }
+
+        * { box-sizing: border-box }
+
+        body {
+            margin: 0;
+            color: var(--text);
+            background: radial-gradient(1200px 600px at 20% -10%, #e8fff8 0, rgba(255,255,255,0) 60%),
+                        radial-gradient(1000px 500px at 120% -20%, #e6f3ff 0, rgba(255,255,255,0) 60%),
+                        var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .shell {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+
+        .brand .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--brand);
+            box-shadow: 0 0 0 6px rgba(0, 184, 148, .12);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .input input {
+            width: 100%;
+            border: 0;
+            outline: 0;
+            font-size: 14px;
+            color: var(--text)
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: 1px solid var(--brand);
+            background: var(--brand);
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+
+        .btn.secondary {
+            background: transparent;
+            color: var(--brand);
+        }
+
+        .btn:active { transform: translateY(1px) }
+
+        .alert {
+            display: none;
+            margin: 14px 0 0;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+        }
+
+        .card {
+            margin-top: 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
+        }
+
+        #player {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+        }
+
+        /* 扩大进度条的可点击/拖动热区而不影响布局高度 */
+        #player .art-progress { padding-top: 20px; padding-bottom: 20px; margin-top: -20px; margin-bottom: -20px }
+
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--muted);
+            margin-top: 16px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .controls { grid-template-columns: 1fr auto }
+            .btn.secondary { display: none }
+        }
+    </style>
 </head>
+
 <body>
-  <h1>欢迎来到我的主页</h1>
-  <p>这是我用 GitHub Pages 搭建的第一个页面！</p>
+    <div class="shell">
+        <div class="nav">
+            <div class="brand">
+                <span class="dot"></span>
+                <span>M3U8 播放器</span>
+            </div>
+            <div class="controls">
+                <div class="input">
+                    <input id="urlInput" type="text" placeholder="请输入 m3u8 或 mp4 地址"
+                           value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
+                </div>
+                <button class="btn secondary" onclick="loadDemo()">示例</button>
+                <button class="btn" onclick="playVideo()">播放</button>
+            </div>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <div class="card">
+            <div id="player"></div>
+        </div>
+
+        <div class="footer">基于 Artplayer + Hls.js</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/artplayer@5/dist/artplayer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <script>
+        let art = null;
+
+        function isValidUrl(str) {
+            try { new URL(str); return true } catch (_) { return false }
+        }
+
+        function showAlert(text) {
+            const el = document.getElementById('alert');
+            el.textContent = text;
+            el.style.display = text ? 'block' : 'none';
+        }
+
+        function loadDemo() {
+            const demo = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+            document.getElementById('urlInput').value = demo;
+            playVideo();
+        }
+
+        function createArt(url) {
+            if (art) art.destroy();
+            art = new Artplayer({
+                container: '#player',
+                url: url,
+                autoplay: false,
+                muted: false,
+                volume: 0.8,
+                playsInline: true,
+                theme: '#00b894',
+                screenshot: true,
+                playbackRate: true,
+                fullscreen: true,
+                fullscreenWeb: true,
+                pip: true,
+                hotkey: true,
+                mutex: true,
+                setting: true,
+                autoSize: true,
+                moreVideoAttr: { crossOrigin: 'anonymous' }
+            });
+            return art;
+        }
+
+        function setupHlsIfNeeded(url) {
+            if (url.includes('.m3u8') && !art.video.canPlayType('application/vnd.apple.mpegurl')) {
+                if (!Hls.isSupported()) {
+                    showAlert('当前浏览器不支持 HLS 播放');
+                    return;
+                }
+                const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+                hls.loadSource(url);
+                hls.attachMedia(art.video);
+                hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, function (_, data) {
+                    if (data && data.audioTracks && data.audioTracks.length > 0) {
+                        const idx = data.audioTracks.findIndex(function (t) { return t.default; });
+                        hls.audioTrack = idx >= 0 ? idx : 0;
+                    }
+                });
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    try {
+                        art.muted = false;
+                        if (art.volume === 0) art.volume = 0.8;
+                    } catch (e) {}
+                });
+                hls.on(Hls.Events.ERROR, function (_, data) {
+                    if (data && data.fatal) {
+                        showAlert('HLS 播放发生错误：' + data.type);
+                    }
+                });
+            }
+        }
+
+        function playVideo() {
+            showAlert('');
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) return showAlert('请先填写播放地址');
+            if (!isValidUrl(url)) return showAlert('请输入有效的 URL');
+            const a = createArt(url);
+            setupHlsIfNeeded(url);
+            a.on('video:error', function () { showAlert('视频播放失败，请检查地址或跨域配置'); });
+        }
+
+        window.addEventListener('DOMContentLoaded', function () {
+            const initial = document.getElementById('urlInput').value;
+            if (initial) playVideo();
+        });
+    </script>
 </body>
+
 </html>
