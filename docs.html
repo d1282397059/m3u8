@@ -62,12 +62,7 @@
                     dateSpan.textContent = item.date;
                     meta.appendChild(dateSpan);
                 }
-                if (item.author) {
-                    const au = document.createElement('span');
-                    au.textContent = '作者：' + item.author;
-                    meta.appendChild(au);
-                }
-
+                
                 const desc = document.createElement('p');
                 desc.className = 'desc';
                 desc.textContent = item.summary || item.description || '';
