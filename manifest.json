@@ -3,7 +3,7 @@
     {
       "title": "什么是M3U8?",
       "path": "docs/m3u8.html",
-      "date": "2025-08-27",
+      "date": "2025-08-26",
       "author": "",
       "summary": "M3U8 是一种基于 UTF-8 编码的播放列表（playlist）文本格式，文件扩展名为 .m3u8。它常用于苹果提出的 HLS（HTTP Live Streaming）流媒体标准，是将一段视频切割成若干小的 TS 切片 并按需加载、顺序播放的核心索引文件。",
       "tags": ["HLS", "M3U8"]
@@ -11,8 +11,8 @@
     {
       "title": "如何将 M3U8 转换为 MP4",
       "path": "docs/m3u8-to-mp4.html",
-      "date": "2025-01-02",
-      "author": "作者名",
+      "date": "2025-08-27",
+      "author": "",
       "summary": "介绍如何将M3U8格式转换为MP4格式的几种简单实用方法，包括在线工具、VLC播放器和命令行工具。",
       "tags": ["M3U8", "MP4", "格式转换"]
     }
