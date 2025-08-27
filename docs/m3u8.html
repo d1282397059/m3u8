@@ -102,45 +102,7 @@ high/index.m3u8
 
     <div class="footer" id="footerLinks"></div>
 </body>
-<script>
-    function renderFooter(links) {
-        const footer = document.getElementById('footerLinks');
-        if (!footer) return;
-        footer.innerHTML = '';
-        const label = document.createElement('span');
-        label.textContent = '友情链接：';
-        footer.appendChild(label);
-        if (Array.isArray(links) && links.length) {
-            links.forEach(function (item, idx) {
-                const a = document.createElement('a');
-                a.href = item.url || '#';
-                a.textContent = item.name || item.title || item.url || '链接';
-                a.target = '_blank';
-                a.rel = 'noopener';
-                footer.appendChild(a);
-                if (idx < links.length - 1) {
-                    const dot = document.createElement('span');
-                    dot.textContent = '·';
-                    footer.appendChild(dot);
-                }
-            });
-        }
-    }
-
-    async function loadFriendLinks() {
-        try {
-            const res = await fetch('../manifest.json', { cache: 'no-cache' });
-            if (!res.ok) throw new Error('manifest not found');
-            const json = await res.json();
-            const links = Array.isArray(json.friendLinks) ? json.friendLinks : (json.friends || []);
-            renderFooter(links);
-        } catch (_) {
-            renderFooter([]);
-        }
-    }
-
-    window.addEventListener('DOMContentLoaded', loadFriendLinks);
-</script>
+<script src="../js/common.js"></script>
 
 </html>
 

@@ -123,7 +123,7 @@ body {
 
 .btn {
     margin-top: 10px;
-    padding: 10px 16px;
+    padding: 8px 16px;
     border: 1px solid var(--brand);
     background: var(--brand);
     color: #fff;
@@ -396,6 +396,45 @@ body {
     color: var(--brand);
     text-decoration: underline;
     text-underline-offset: 3px;
+}
+
+/* 友链样式 */
+.friend-links {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.friend-links h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.links-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.friend-link {
+    color: var(--text);
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.friend-link:hover {
+    color: var(--brand);
+    border-color: var(--brand);
+    background-color: rgba(0, 184, 148, 0.05);
+    text-decoration: none;
 }
 
 /* 响应式设计 */
