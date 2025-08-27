@@ -16,6 +16,7 @@
     }
   ],
   "friendLinks": [
+    { "name": "站点地图", "url": "./sitemap.xml" },
     { "name": "CSDN", "url": "https://www.csdn.net/" },
     { "name": "博客园", "url": "https://www.cnblogs.com/" },
     { "name": "ArtPlayer 官网", "url": "https://artplayer.org/" }
