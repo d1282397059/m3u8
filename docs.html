@@ -7,104 +7,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="description" content="文章列表，展示 docs 目录下的文章。支持从 manifest.json 加载元数据。">
     <link rel="stylesheet" href="./css/styles.css">
-    <style>
-        /* 列表与卡片（页面特有） */
-        .header {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 12px;
-            margin: 8px 0 14px;
-            padding: 14px 16px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
-        }
-
-        .list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        @media (max-width: 860px) {
-            .list {
-                grid-template-columns: 1fr
-            }
-        }
-
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
-            transition: transform .15s ease, box-shadow .15s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08)
-        }
-
-        .title {
-            margin: 0 0 8px 0;
-            font-size: 18px;
-        }
-
-        .meta {
-            color: var(--muted);
-            font-size: 13px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .tags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap
-        }
-
-        .tag {
-            font-size: 12px;
-            color: #0f766e;
-            background: rgba(0, 184, 148, 0.14);
-            border: 1px solid rgba(0, 184, 148, 0.25);
-            padding: 2px 8px;
-            border-radius: 999px;
-        }
-
-        .desc {
-            color: #334155;
-            font-size: 14px;
-            line-height: 1.6;
-            margin: 0 0 12px 0
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px
-        }
-
-        .btn {
-            margin-top: 14px;
-            padding: 8px 14px;
-            text-decoration: none;
-            font-size: 14px
-        }
-
-        .empty {
-            margin-top: 16px;
-            padding: 16px;
-            border-radius: 12px;
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
-            color: #9a3412;
-        }
-    </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3530207113372131"
     crossorigin="anonymous"></script>
 </head>
@@ -119,13 +21,14 @@
         <div class="header">
             <div>
                 <h2 style="margin:0">文章列表</h2>
-                <div style="color:var(--muted);font-size:13px">来自项目根目录下的 <code>docs</code> 文件夹</div>
             </div>
         </div>
 
         <div id="list" class="list"></div>
         <div id="empty" class="empty" style="display:none"></div>
     </div>
+
+    <div class="footer" id="footerLinks"></div>
 
     <script>
         const listEl = document.getElementById('list');
@@ -140,7 +43,7 @@
             const frag = document.createDocumentFragment();
             articles.forEach(function (item) {
                 const card = document.createElement('article');
-                card.className = 'card';
+                card.className = 'card article-card';
 
                 const h3 = document.createElement('h3');
                 h3.className = 'title';
@@ -210,7 +113,7 @@
 
         async function loadManifest() {
             try {
-                const res = await fetch('docs/manifest.json', { cache: 'no-cache' });
+                const res = await fetch('manifest.json', { cache: 'no-cache' });
                 if (!res.ok) throw new Error('manifest not found');
                 const json = await res.json();
                 const articles = normalizeArticles(json);
@@ -223,7 +126,44 @@
             }
         }
 
+        function renderFooter(links) {
+            const footer = document.getElementById('footerLinks');
+            if (!footer) return;
+            footer.innerHTML = '';
+            const label = document.createElement('span');
+            label.textContent = '友情链接：';
+            footer.appendChild(label);
+            if (Array.isArray(links) && links.length) {
+                links.forEach(function (item, idx) {
+                    const a = document.createElement('a');
+                    a.href = item.url || '#';
+                    a.textContent = item.name || item.title || item.url || '链接';
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    footer.appendChild(a);
+                    if (idx < links.length - 1) {
+                        const dot = document.createElement('span');
+                        dot.textContent = '·';
+                        footer.appendChild(dot);
+                    }
+                });
+            }
+        }
+
+        async function loadFriendLinks() {
+            try {
+                const res = await fetch('manifest.json', { cache: 'no-cache' });
+                if (!res.ok) throw new Error('manifest not found');
+                const json = await res.json();
+                const links = Array.isArray(json.friendLinks) ? json.friendLinks : (json.friends || []);
+                renderFooter(links);
+            } catch (_) {
+                renderFooter([]);
+            }
+        }
+
         loadManifest();
+        loadFriendLinks();
     </script>
 </body>
 

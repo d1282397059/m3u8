@@ -8,24 +8,6 @@
     <meta name="keywords" content="m3u8播放器,hls播放器,在线m3u8,在线hls,artplayer网页播放器">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="./css/styles.css">
-    <style>
-        .card { margin-top: 18px; overflow: hidden }
-
-        #player {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background-color: #000;
-        }
-
-        /* 扩大进度条的可点击/拖动热区而不影响布局高度 */
-        #player .art-progress {
-            padding-top: 20px;
-            padding-bottom: 20px;
-            margin-top: -20px;
-            margin-bottom: -20px
-        }
-
-    </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3530207113372131"
     crossorigin="anonymous"></script>
 </head>
@@ -56,7 +38,7 @@
 
         <div id="alert" class="alert"></div>
 
-        <div class="card">
+        <div class="card player-card">
             <div id="player"></div>
         </div>
 
@@ -100,14 +82,7 @@ segment1.ts
             <b>锲而不舍，金石可镂。——《荀子·劝学》</b>
         </div>
 
-        <div class="footer">
-            <span>友情链接：</span>
-            <a href="https://www.csdn.net/" target="_blank" rel="noopener">CSDN</a>
-            <span>·</span>
-            <a href="https://www.cnblogs.com/" target="_blank" rel="noopener">博客园</a>
-            <span>·</span>
-            <a href="https://artplayer.org/" target="_blank" rel="noopener">ArtPlayer 官网</a>
-        </div>
+        <div class="footer" id="footerLinks"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/artplayer@5/dist/artplayer.min.js"></script>
@@ -195,9 +170,46 @@ segment1.ts
             a.on('video:error', function () { showAlert('视频播放失败，请检查地址或跨域配置'); });
         }
 
+        function renderFooter(links) {
+            const footer = document.getElementById('footerLinks');
+            if (!footer) return;
+            footer.innerHTML = '';
+            const label = document.createElement('span');
+            label.textContent = '友情链接：';
+            footer.appendChild(label);
+            if (Array.isArray(links) && links.length) {
+                links.forEach(function (item, idx) {
+                    const a = document.createElement('a');
+                    a.href = item.url || '#';
+                    a.textContent = item.name || item.title || item.url || '链接';
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    footer.appendChild(a);
+                    if (idx < links.length - 1) {
+                        const dot = document.createElement('span');
+                        dot.textContent = '·';
+                        footer.appendChild(dot);
+                    }
+                });
+            }
+        }
+
+        async function loadFriendLinks() {
+            try {
+                const res = await fetch('manifest.json', { cache: 'no-cache' });
+                if (!res.ok) throw new Error('manifest not found');
+                const json = await res.json();
+                const links = Array.isArray(json.friendLinks) ? json.friendLinks : (json.friends || []);
+                renderFooter(links);
+            } catch (_) {
+                renderFooter([]);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', function () {
             const initial = document.getElementById('urlInput').value;
             if (initial) playVideo();
+            loadFriendLinks();
         });
     </script>
 </body>
