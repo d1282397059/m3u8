@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>文章列表 - M3U8播放器在线</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="文章列表，展示 docs 目录下的文章。支持从 manifest.json 加载元数据。">
+    <meta name="description" content="文章列表，展示 docs 目录下的文章。">
     <link rel="stylesheet" href="./css/styles.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3530207113372131"
     crossorigin="anonymous"></script>
@@ -24,109 +24,59 @@
             </div>
         </div>
 
-        <div id="list" class="list"></div>
+        <div id="list" class="list">
+            <!-- 文章列表直接硬编码在这里 -->
+            <article class="card article-card">
+                <h3 class="title">
+                    <a href="docs/m3u8.html" style="text-decoration: none; color: inherit;">什么是M3U8?</a>
+                </h3>
+                <div class="meta">
+                    <span>2025-08-26</span>
+                </div>
+                <p class="desc">M3U8 是一种基于 UTF-8 编码的播放列表（playlist）文本格式，文件扩展名为 .m3u8。它常用于苹果提出的 HLS（HTTP Live Streaming）流媒体标准，是将一段视频切割成若干小的 TS 切片 并按需加载、顺序播放的核心索引文件。</p>
+                <div class="tags">
+                    <span class="tag">HLS</span>
+                    <span class="tag">M3U8</span>
+                </div>
+                <div class="actions">
+                    <a href="docs/m3u8.html" class="btn" target="_blank" rel="noopener">阅读</a>
+                </div>
+            </article>
+            <article class="card article-card">
+                <h3 class="title">
+                    <a href="docs/m3u8-to-mp4.html" style="text-decoration: none; color: inherit;">如何将 M3U8 转换为 MP4</a>
+                </h3>
+                <div class="meta">
+                    <span>2025-08-27</span>
+                </div>
+                <p class="desc">介绍如何将M3U8格式转换为MP4格式的几种简单实用方法，包括在线工具、VLC播放器和命令行工具。</p>
+                <div class="tags">
+                    <span class="tag">M3U8</span>
+                    <span class="tag">MP4</span>
+                    <span class="tag">格式转换</span>
+                </div>
+                <div class="actions">
+                    <a href="docs/m3u8-to-mp4.html" class="btn" target="_blank" rel="noopener">阅读</a>
+                </div>
+            </article>
+        </div>
         <div id="empty" class="empty" style="display:none"></div>
     </div>
 
-    <div class="footer" id="footerLinks"></div>
+    <div class="footer">
+        <!-- 友链直接硬编码在这里 -->
+        <div class="friend-links">
+            <h3>友情链接</h3>
+            <div class="links-container">
+                <a href="./sitemap.xml" target="_blank" rel="noopener">站点地图</a>
+                <a href="https://www.csdn.net/" target="_blank" rel="noopener">CSDN</a>
+                <a href="https://www.cnblogs.com/" target="_blank" rel="noopener">博客园</a>
+                <a href="https://artplayer.org/" target="_blank" rel="noopener">ArtPlayer 官网</a>
+            </div>
+        </div>
+    </div>
 
     <script src="./js/common.js"></script>
-    <script>
-        const listEl = document.getElementById('list');
-        const emptyEl = document.getElementById('empty');
-
-        function renderArticles(articles) {
-            if (!articles || articles.length === 0) {
-                emptyEl.style.display = 'block';
-                emptyEl.textContent = '未找到文章。请在项目的 docs/ 目录中添加 markdown 或 html 文件，并可选创建 docs/manifest.json。';
-                return;
-            }
-            const frag = document.createDocumentFragment();
-            articles.forEach(function (item) {
-                const card = document.createElement('article');
-                card.className = 'card article-card';
-
-                const h3 = document.createElement('h3');
-                h3.className = 'title';
-                const link = document.createElement('a');
-                link.href = item.path || '#';
-                link.textContent = item.title || '未命名文章';
-                link.style.textDecoration = 'none';
-                link.style.color = 'inherit';
-                h3.appendChild(link);
-
-                const meta = document.createElement('div');
-                meta.className = 'meta';
-                if (item.date) {
-                    const dateSpan = document.createElement('span');
-                    dateSpan.textContent = item.date;
-                    meta.appendChild(dateSpan);
-                }
-                
-                const desc = document.createElement('p');
-                desc.className = 'desc';
-                desc.textContent = item.summary || item.description || '';
-
-                const tagWrap = document.createElement('div');
-                tagWrap.className = 'tags';
-                if (Array.isArray(item.tags)) {
-                    item.tags.forEach(function (t) {
-                        const tag = document.createElement('span');
-                        tag.className = 'tag';
-                        tag.textContent = t;
-                        tagWrap.appendChild(tag);
-                    });
-                }
-
-                const actions = document.createElement('div');
-                actions.className = 'actions';
-                const readBtn = document.createElement('a');
-                readBtn.className = 'btn';
-                readBtn.href = item.path || '#';
-                readBtn.textContent = '阅读';
-                readBtn.target = '_blank';
-                readBtn.rel = 'noopener';
-
-                actions.appendChild(readBtn);
-
-                card.appendChild(h3);
-                card.appendChild(meta);
-                if (desc.textContent) card.appendChild(desc);
-                if (tagWrap.childNodes.length) card.appendChild(tagWrap);
-                card.appendChild(actions);
-
-                frag.appendChild(card);
-            });
-            listEl.appendChild(frag);
-        }
-
-        function normalizeArticles(data) {
-            if (!data) return [];
-            if (Array.isArray(data)) return data;
-            if (Array.isArray(data.articles)) return data.articles;
-            return [];
-        }
-
-        async function loadManifest() {
-            try {
-                const res = await fetch('manifest.json', { cache: 'no-cache' });
-                if (!res.ok) throw new Error('manifest not found');
-                const json = await res.json();
-                const articles = normalizeArticles(json);
-                if (!articles.length) throw new Error('empty manifest');
-                renderArticles(articles);
-            } catch (e) {
-                emptyEl.style.display = 'block';
-                emptyEl.innerHTML = '未检测到 <code>docs/manifest.json</code>，请创建示例：<pre style="margin-top:8px;white-space:pre-wrap;background:#fff;padding:10px;border-radius:8px;border:1px solid var(--border)">\
-{\n  "articles": [\n    {\n      "title": "示例文章",\n      "path": "docs/example.html",\n      "date": "2025-01-01",\n      "author": "作者名",\n      "summary": "这里是摘要……",\n      "tags": ["HLS", "M3U8"]\n    }\n  ]\n}\n</pre>';
-            }
-        }
-
-        function renderFooter(links) {
-        }
-
-        loadManifest();
-    </script>
 </body>
 
 </html>
