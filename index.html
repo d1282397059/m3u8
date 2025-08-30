@@ -29,8 +29,7 @@
             </div>
             <div class="controls">
                 <div class="input">
-                    <input id="urlInput" type="text" placeholder="请输入 m3u8 或 mp4 地址"
-                        value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
+                    <input id="urlInput" type="text" placeholder="请输入 m3u8 或 mp4 地址">
                 </div>
                 <button class="btn secondary" onclick="loadDemo()">示例</button>
                 <button class="btn" onclick="playVideo()">播放</button>
@@ -52,7 +51,7 @@
             <h3>什么是m3u8文件？</h3>
             <p>
                 <strong>M3U8</strong> 是一种基于 UTF-8 编码的播放列表（playlist）文本文件，扩展名为 <code>.m3u8</code>。
-                它本身并不包含视频数据，而是按顺序列出若干 <em>TS 切片</em>（小片段）或不同清晰度的子流地址，供播放器按需拉取并无缝拼接播放，因此是实现 <strong>HLS（HTTP Live
+                它本身并不包含视频数据，而是按顺序列出若干 <em>TS 切片</em>（小片段）或不同清晰度的子流地址，供播放器按需拉取而无缝拼接播放，因此是实现 <strong>HLS（HTTP Live
                     Streaming）</strong> 的核心文件。
             </p>
 
@@ -184,8 +183,7 @@ segment1.ts
         }
 
         window.addEventListener('DOMContentLoaded', function () {
-            const initial = document.getElementById('urlInput').value;
-            if (initial) playVideo();
+            // 移除自动播放，需要用户手动点击播放按钮
         });
     </script>
 </body>
